@@ -1,0 +1,117 @@
+# ======================================
+# STEP 1: Import Libraries
+# ======================================
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import os
+
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.preprocessing import LabelEncoder
+
+
+# ======================================
+# STEP 2: Upload File (ONLY for Colab)
+# ======================================
+
+try:
+    from google.colab import files
+    uploaded = files.upload()
+except:
+    print("If using Jupyter/VS Code, make sure file is in same folder.")
+
+
+# ======================================
+# STEP 3: Load Dataset
+# ======================================
+
+file_name = "ultimate_student_productivity_dataset_5000.csv"
+
+print("Current Working Directory:", os.getcwd())
+
+df = pd.read_csv(file_name)
+
+print("\nDataset Loaded Successfully ✅")
+print("Shape:", df.shape)
+print(df.head())
+
+
+# ======================================
+# STEP 4: Encode Categorical Columns
+# ======================================
+
+label_encoder = LabelEncoder()
+
+for col in df.select_dtypes(include=['object']).columns:
+    df[col] = label_encoder.fit_transform(df[col])
+
+
+# ======================================
+# STEP 5: Define Features & Target
+# ======================================
+
+X = df.drop("exam_score", axis=1)
+y = df["exam_score"]
+
+
+# ======================================
+# STEP 6: Train-Test Split
+# ======================================
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+
+# ======================================
+# STEP 7: Train Linear Regression Model
+# ======================================
+
+model = LinearRegression()
+model.fit(X_train, y_train)
+
+y_pred = model.predict(X_test)
+
+
+# ======================================
+# STEP 8: Evaluation
+# ======================================
+
+r2 = r2_score(y_test, y_pred)
+mse = mean_squared_error(y_test, y_pred)
+
+print("\n===== Model Evaluation =====")
+print("R2 Score:", r2)
+print("Mean Squared Error:", mse)
+
+
+# ======================================
+# STEP 9: Visualization 1
+# Actual vs Predicted
+# ======================================
+
+plt.figure()
+plt.scatter(y_test, y_pred)
+plt.xlabel("Actual Exam Score")
+plt.ylabel("Predicted Exam Score")
+plt.title("Actual vs Predicted Exam Score")
+plt.show()
+
+
+# ======================================
+# STEP 10: Visualization 2
+# Study Hours vs Exam Score
+# ======================================
+
+if "study_hours" in df.columns:
+    plt.figure()
+    plt.scatter(df["study_hours"], df["exam_score"])
+    plt.xlabel("Study Hours")
+    plt.ylabel("Exam Score")
+    plt.title("Study Hours vs Exam Score")
+    plt.show()
+else:
+    print("Column 'study_hours' not found for second visualization.")
